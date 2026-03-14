@@ -6,8 +6,10 @@ import { PenLine, Search, Plus, Save, X, Sparkles, Loader2 } from 'lucide-react'
 import { cn, formatDate, getInitials } from '@/lib/utils';
 import { noteApi, employeeApi } from '@/lib/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function ManualNotesPage() {
+  const { user } = useAppStore();
   const [search, setSearch] = useState('');
   const [showEditor, setShowEditor] = useState(false);
   const [selectedNote, setSelectedNote] = useState<any | null>(null);
@@ -34,7 +36,7 @@ export default function ManualNotesPage() {
     if (!selectedEmployee || !noteContent) return;
     createNoteMutation.mutate({
       employeeId: selectedEmployee,
-      author: 'Sarah Mitchell', // Hardcoded for demo/HRO
+      author: user?.name || 'HR Officer',
       content: noteContent
     });
   };

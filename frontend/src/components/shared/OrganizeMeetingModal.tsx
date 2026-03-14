@@ -176,27 +176,34 @@ export function OrganizeMeetingModal({ isOpen, onClose, employeeId, employeeName
                   <h3 className="text-sm font-semibold flex items-center gap-2 text-primary mb-3">
                     <Sparkles size={16} /> AI Meeting Brief
                   </h3>
+                  {prepData.brief && (
+                    <p className="text-sm text-foreground/80 mb-3 italic">{prepData.brief}</p>
+                  )}
                   <div className="space-y-3">
                     <div>
                       <h4 className="text-xs font-semibold text-text-muted uppercase mb-1">Key Context</h4>
                       <ul className="text-sm space-y-1">
-                        {prepData.keyContext.map((c: string, i: number) => (
+                        {prepData.keyContext?.length > 0 ? prepData.keyContext.map((c: string, i: number) => (
                           <li key={i} className="flex gap-2">
                             <span className="text-primary mt-1">•</span>
                             <span className="text-foreground/90">{c}</span>
                           </li>
-                        ))}
+                        )) : (
+                          <li className="text-text-muted text-xs">No context available yet</li>
+                        )}
                       </ul>
                     </div>
                     <div>
                       <h4 className="text-xs font-semibold text-text-muted uppercase mb-1 mt-3">Suggested Topics</h4>
                       <ul className="text-sm space-y-1">
-                        {prepData.suggestedTopics.map((t: string, i: number) => (
+                        {prepData.suggestedTopics?.length > 0 ? prepData.suggestedTopics.map((t: string, i: number) => (
                           <li key={i} className="flex gap-2">
                             <span className="text-primary mt-1">•</span>
                             <span className="text-foreground/90">{t}</span>
                           </li>
-                        ))}
+                        )) : (
+                          <li className="text-text-muted text-xs">No topics available yet</li>
+                        )}
                       </ul>
                     </div>
                   </div>

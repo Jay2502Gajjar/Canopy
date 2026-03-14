@@ -44,9 +44,9 @@ async def seed():
         password_hash = get_password_hash('admin123')
         
         users = [
-            {"name": 'Sarah Mitchell', "email": 'sarah.mitchell@canopy.io', "role": 'hro'},
-            {"name": 'James Wilson', "email": 'james.wilson@canopy.io', "role": 'chro'},
-            {"name": 'Priya Sharma', "email": 'priya.sharma@canopy.io', "role": 'hrbp'},
+            {"name": 'Sarah Mitchell', "email": 'jaygajjar2502@gmail.com', "role": 'hro'},
+            {"name": 'James Wilson', "email": 'jaygajjar445@gmail.com', "role": 'chro'},
+            {"name": 'Priya Sharma', "email": 'jaygajjar2521@gmail.com', "role": 'hrbp'},
         ]
         
         user_ids = {}
@@ -289,9 +289,9 @@ async def seed():
         print('🎉 Database seeded successfully!')
         print('═══════════════════════════════════════\n')
         print('Default login credentials:')
-        print('  HRO:  sarah.mitchell@canopy.io / admin123')
-        print('  CHRO: james.wilson@canopy.io / admin123')
-        print('  HRBP: priya.sharma@canopy.io / admin123\n')
+        print('  HRO:  jaygajjar2502@gmail.com / admin123')
+        print('  CHRO: jaygajjar445@gmail.com / admin123')
+        print('  HRBP: jaygajjar2521@gmail.com / admin123\n')
 
     await pool.close()
 

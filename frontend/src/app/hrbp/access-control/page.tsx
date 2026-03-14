@@ -7,7 +7,7 @@ import { cn, formatDate } from '@/lib/utils';
 import { AddUserModal } from '@/components/shared/AddUserModal';
 
 const mockUsers = [
-  { id: '1', name: 'Sarah Mitchell', email: 'sarah@canopy.io', role: 'HRO', departments: ['All'], lastLogin: '2026-03-13', status: 'active' },
+  { id: '1', name: 'Jay Gajjar', email: 'sarah@canopy.io', role: 'HRO', departments: ['All'], lastLogin: '2026-03-13', status: 'active' },
   { id: '2', name: 'Vikram Singh', email: 'vikram@canopy.io', role: 'CHRO', departments: ['All'], lastLogin: '2026-03-13', status: 'active' },
   { id: '3', name: 'Priya Sharma', email: 'priya@canopy.io', role: 'HRBP', departments: ['Engineering', 'Product'], lastLogin: '2026-03-12', status: 'active' },
 ];

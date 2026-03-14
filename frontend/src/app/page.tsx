@@ -11,12 +11,8 @@ export default function Home() {
 
   useEffect(() => {
     initTheme();
-    setUser(mockUser);
-    useAppStore.setState({ notifications: mockNotifications });
-    // Route based on user role
-    const role = mockUser.role;
-    router.replace(`/${role}/dashboard`);
-  }, [router, setUser, initTheme]);
+    router.replace('/auth/login');
+  }, [router, initTheme]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface">

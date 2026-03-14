@@ -7,9 +7,9 @@ import { cn, formatDate } from '@/lib/utils';
 import { AddUserModal } from '@/components/shared/AddUserModal';
 
 const mockAuditLog = [
-  { id: 'a1', timestamp: '2026-03-13T16:00:00Z', user: 'Sarah Mitchell', action: 'Viewed employee profile', data: 'Deepak Verma', ip: '192.168.1.45' },
+  { id: 'a1', timestamp: '2026-03-13T16:00:00Z', user: 'Jay Gajjar', action: 'Viewed employee profile', data: 'Deepak Verma', ip: '192.168.1.45' },
   { id: 'a2', timestamp: '2026-03-13T14:30:00Z', user: 'AI System', action: 'Generated risk flag', data: 'Engineering dept', ip: 'System' },
-  { id: 'a3', timestamp: '2026-03-13T10:00:00Z', user: 'Sarah Mitchell', action: 'Approved leave', data: 'Meera Nair', ip: '192.168.1.45' },
+  { id: 'a3', timestamp: '2026-03-13T10:00:00Z', user: 'Jay Gajjar', action: 'Approved leave', data: 'Meera Nair', ip: '192.168.1.45' },
 ];
 
 export default function CHROAccessControlPage() {
