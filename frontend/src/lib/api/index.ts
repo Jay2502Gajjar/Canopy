@@ -67,7 +67,8 @@ export const commitmentApi = {
 // Transcript endpoints
 export const transcriptApi = {
   getAll: () => request<any[]>('/api/transcripts'),
-  getByEmployee: (id: string) => request<any[]>(`/api/transcripts/${id}`),
+  getById: (id: string) => request<any>(`/api/transcripts/${id}`),
+  getByEmployee: (id: string) => request<any[]>(`/api/transcripts/employee/${id}`),
   upload: (data: any) => request<any>('/api/transcripts/upload', { method: 'POST', body: data }),
 };
 
@@ -111,7 +112,7 @@ export const authApi = {
   verifyOtp: (data: { userId: string; code: string }) => request<any>('/api/auth/verify-otp', { method: 'POST', body: data }),
   logout: () => request<void>('/api/auth/logout', { method: 'POST' }),
   getProfile: () => request<any>('/api/auth/profile'),
-  updateProfile: (data: { name: string }) => request<any>('/api/auth/profile', { method: 'PATCH', body: data }),
+  updateProfile: (data: { name?: string; email?: string }) => request<any>('/api/auth/profile', { method: 'PATCH', body: data }),
 };
 
 // HR Team endpoints

@@ -158,10 +158,10 @@ export function Header({ pageTitle }: { pageTitle?: string }) {
           <button onClick={() => setProfileOpen(!profileOpen)}
             className="flex items-center gap-2 h-9 px-2 rounded-lg hover:bg-surface transition-colors">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/60 text-white flex items-center justify-center text-xs font-bold shadow-sm">
-              {user ? getInitials(user.name) : 'SM'}
+              {user ? getInitials(user.name) : '??'}
             </div>
             <div className="hidden sm:block text-left">
-              <p className="text-xs font-semibold leading-tight">{user?.name || 'Sarah Mitchell'}</p>
+              <p className="text-xs font-semibold leading-tight">{user?.name || 'Loading...'}</p>
               <p className="text-[10px] text-text-muted leading-tight">{role.toUpperCase()}</p>
             </div>
             <ChevronDown size={12} className={cn('text-text-muted transition-transform', profileOpen && 'rotate-180')} />
@@ -171,10 +171,10 @@ export function Header({ pageTitle }: { pageTitle?: string }) {
             <div className="absolute right-0 top-full mt-1 w-56 bg-surface-card border border-border rounded-xl shadow-xl overflow-hidden z-50">
               <div className="p-3 border-b border-border flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 text-white flex items-center justify-center text-sm font-bold">
-                  {user ? getInitials(user.name) : 'SM'}
+                  {user ? getInitials(user.name) : '??'}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">{user?.name || 'Sarah Mitchell'}</p>
+                  <p className="text-sm font-semibold">{user?.name || 'Loading...'}</p>
                   <p className="text-xs text-text-muted">{role.toUpperCase()} · HR Intelligence</p>
                 </div>
               </div>

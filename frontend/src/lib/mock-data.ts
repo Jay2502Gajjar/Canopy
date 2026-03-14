@@ -5,13 +5,13 @@ import type { User, Notification, ActivityItem, ManualNote } from '@/types/user'
 
 export const mockUser: User = {
   id: 'u1',
-  name: 'Sarah Mitchell',
-  firstName: 'Sarah',
-  email: 'sarah.mitchell@canopy.io',
+  name: 'Jay Gajjar',
+  firstName: 'Jay',
+  email: 'jaygajjar2502@gmail.com',
   role: 'hro',
   department: 'Human Resources',
   avatar: '',
-  phone: '+1 555-0101',
+  phone: '+91 98765 43210',
   lastLogin: '2026-03-13T18:00:00Z',
   accountStatus: 'active',
 };
@@ -306,16 +306,16 @@ export const mockNotifications: Notification[] = [
 export const mockActivities: ActivityItem[] = [
   { id: 'act1', type: 'resignation_flagged', description: 'AI flagged potential resignation risk', employeeName: 'Deepak Verma', actedBy: 'AI System', timestamp: '2026-03-13T16:00:00Z' },
   { id: 'act2', type: 'profile_update', description: 'Transcript analysis completed and insights saved', employeeName: 'Rahul Kumar', actedBy: 'AI System', timestamp: '2026-03-13T14:30:00Z' },
-  { id: 'act3', type: 'leave_approval', description: 'Annual leave approved (Mar 20-22)', employeeName: 'Meera Nair', actedBy: 'Sarah Mitchell', timestamp: '2026-03-13T10:15:00Z' },
+  { id: 'act3', type: 'leave_approval', description: 'Annual leave approved (Mar 20-22)', employeeName: 'Meera Nair', actedBy: 'Jay Gajjar', timestamp: '2026-03-13T10:15:00Z' },
   { id: 'act4', type: 'promotion', description: 'Promoted from Senior PM to Lead PM', employeeName: 'Ananya Patel', actedBy: 'HR Admin', timestamp: '2026-03-10T09:00:00Z' },
-  { id: 'act5', type: 'new_hire', description: 'Onboarding initiated for new Data Engineer', employeeName: 'Rohan Mehta', actedBy: 'Sarah Mitchell', timestamp: '2026-03-08T11:00:00Z' },
+  { id: 'act5', type: 'new_hire', description: 'Onboarding initiated for new Data Engineer', employeeName: 'Rohan Mehta', actedBy: 'Jay Gajjar', timestamp: '2026-03-08T11:00:00Z' },
   { id: 'act6', type: 'role_change', description: 'Moved from Engineering to Product team', employeeName: 'Priya Iyer', actedBy: 'HR Admin', timestamp: '2026-03-05T14:00:00Z' },
 ];
 
 export const mockNotes: ManualNote[] = [
-  { id: 'note1', employeeId: 'e1', employeeName: 'Rahul Kumar', content: 'Rahul seems genuinely frustrated about the promotion situation. He\'s been patient for two years but I can sense he\'s reaching a tipping point. Need to accelerate the conversation with engineering leadership about creating a clear management track for senior engineers.', preview: 'Rahul seems genuinely frustrated about the promotion situation...', date: '2026-03-01', author: 'Sarah Mitchell', meetingContext: 'Post check-in Feb 28', aiHighlights: ['Promotion frustration at tipping point', 'Management track needed for senior engineers'] },
-  { id: 'note2', employeeId: 'e3', employeeName: 'Deepak Verma', content: 'Deepak\'s situation is concerning. He\'s been overlooked for months despite putting in significant overtime. The QA team genuinely needs more people — this isn\'t just a morale issue, it\'s a capacity problem. Need to push the headcount request harder.', preview: 'Deepak\'s situation is concerning. He\'s been overlooked for months...', date: '2026-01-08', author: 'Sarah Mitchell', meetingContext: 'Post check-in Jan 5', aiHighlights: ['Critical capacity issue in QA', 'Headcount request needs escalation'] },
-  { id: 'note3', employeeId: 'e5', employeeName: 'Arjun Menon', content: 'The sales team is under heavy pressure. Arjun is putting on a brave face but losing two experienced reps last quarter has clearly impacted morale. The targets were set before the attrition happened and haven\'t been adjusted.', preview: 'The sales team is under heavy pressure. Arjun is putting on...', date: '2026-02-16', author: 'Sarah Mitchell', aiHighlights: ['Team attrition impacting morale', 'Targets not adjusted post-attrition'] },
+  { id: 'note1', employeeId: 'e1', employeeName: 'Rahul Kumar', content: 'Rahul seems genuinely frustrated about the promotion situation. He\'s been patient for two years but I can sense he\'s reaching a tipping point. Need to accelerate the conversation with engineering leadership about creating a clear management track for senior engineers.', preview: 'Rahul seems genuinely frustrated about the promotion situation...', date: '2026-03-01', author: 'Jay Gajjar', meetingContext: 'Post check-in Feb 28', aiHighlights: ['Promotion frustration at tipping point', 'Management track needed for senior engineers'] },
+  { id: 'note2', employeeId: 'e3', employeeName: 'Deepak Verma', content: 'Deepak\'s situation is concerning. He\'s been overlooked for months despite putting in significant overtime. The QA team genuinely needs more people — this isn\'t just a morale issue, it\'s a capacity problem. Need to push the headcount request harder.', preview: 'Deepak\'s situation is concerning. He\'s been overlooked for months...', date: '2026-01-08', author: 'Jay Gajjar', meetingContext: 'Post check-in Jan 5', aiHighlights: ['Critical capacity issue in QA', 'Headcount request needs escalation'] },
+  { id: 'note3', employeeId: 'e5', employeeName: 'Arjun Menon', content: 'The sales team is under heavy pressure. Arjun is putting on a brave face but losing two experienced reps last quarter has clearly impacted morale. The targets were set before the attrition happened and haven\'t been adjusted.', preview: 'The sales team is under heavy pressure. Arjun is putting on...', date: '2026-02-16', author: 'Jay Gajjar', aiHighlights: ['Team attrition impacting morale', 'Targets not adjusted post-attrition'] },
 ];
 
 export const mockGraphNodes = [

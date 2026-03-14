@@ -78,7 +78,7 @@ export default function CHRODashboard() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[
-            { id: '1', name: 'Sarah Mitchell', role: 'HRO', dept: 'All Departments', status: 'Active', notes: 12, meetings: 8 },
+            { id: '1', name: 'Jay Gajjar', role: 'HRO', dept: 'All Departments', status: 'Active', notes: 12, meetings: 8 },
             { id: '3', name: 'Priya Sharma', role: 'HRBP', dept: 'Engineering, Product', status: 'Active', notes: 9, meetings: 5 },
             { id: '4', name: 'Ankit Verma', role: 'HRBP', dept: 'Sales, Marketing', status: 'Active', notes: 7, meetings: 4 },
           ].map((hr) => (

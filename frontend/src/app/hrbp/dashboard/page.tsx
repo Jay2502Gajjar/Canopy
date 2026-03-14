@@ -83,7 +83,7 @@ export default function HRBPDashboard() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { id: '1', name: 'Sarah Mitchell', role: 'HRO', dept: 'All Departments', notes: 12, meetings: 8 },
+            { id: '1', name: 'Jay Gajjar', role: 'HRO', dept: 'All Departments', notes: 12, meetings: 8 },
             { id: '2', name: 'Vikram Patel', role: 'CHRO', dept: 'Executive Oversight', notes: 5, meetings: 3 },
           ].map((hr) => (
             <Link key={hr.name} href={`/hrbp/employees/${hr.name}`} className="flex items-center gap-3 p-3 rounded-lg bg-surface hover:bg-surface/80 transition-colors group">

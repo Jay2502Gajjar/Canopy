@@ -12,6 +12,7 @@ import { MemoryScoreBar } from '@/components/employees/MemoryScoreBar';
 import { SentimentSparkline } from '@/components/shared/SentimentSparkline';
 import { PrepModal } from '@/components/shared/PrepModal';
 import { AddUserModal } from '@/components/shared/AddUserModal';
+import { useAppStore } from '@/store/useAppStore';
 import { employeeApi, meetingApi, commitmentApi, analyticsApi } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
@@ -23,6 +24,7 @@ export default function HRODashboard() {
   const [commitments, setCommitments] = useState<any[]>([]);
   const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
 
+  const { user } = useAppStore();
   const { data: employees = [], isLoading: isLoadingEmp } = useQuery({ queryKey: ['employees'], queryFn: employeeApi.getAll });
   const { data: meetings = [], isLoading: isLoadingMeet } = useQuery({ queryKey: ['meetings'], queryFn: meetingApi.getAll });
   const { data: dbCommitments = [], isLoading: isLoadingCom } = useQuery({ queryKey: ['commitments'], queryFn: commitmentApi.getAll });
@@ -75,7 +77,7 @@ export default function HRODashboard() {
       {/* Welcome */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading">{getGreeting()}, Sarah</h1>
+          <h1 className="text-2xl font-bold font-heading">{getGreeting()}, {user?.name?.split(' ')[0] || 'User'}</h1>
           <p className="text-sm text-text-muted mt-0.5">Here's the org status at a glance</p>
         </div>
         <button onClick={() => setIsAddEmployeeOpen(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors shadow-sm">

@@ -41,10 +41,18 @@ export function ProfilePageContent({ role, userName, userEmail, userRole, depart
   const saveProfile = async () => {
     setIsSaving(true);
     try {
-      const res = await authApi.updateProfile({ name });
+      // Send both name and email to the backend
+      const res = await authApi.updateProfile({ name, email });
+      
+      // Update global store
       const user = useAppStore.getState().user;
       if (user) {
-        setUser({ ...user, name: res.name, firstName: res.firstName });
+        setUser({ 
+          ...user, 
+          name: res.name, 
+          firstName: res.firstName,
+          email: res.email 
+        });
       }
       setSavedMsg('Profile saved successfully!');
     } catch (err: any) {

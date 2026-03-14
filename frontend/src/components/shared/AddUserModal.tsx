@@ -20,6 +20,7 @@ export function AddUserModal({ isOpen, onClose, title, defaultRole }: AddUserMod
     email: '',
     role: defaultRole || 'Employee',
     department: 'Engineering',
+    employeeId: '',
   });
 
   if (!isOpen) return null;
@@ -36,8 +37,7 @@ export function AddUserModal({ isOpen, onClose, title, defaultRole }: AddUserMod
         email: formData.email,
         role: formData.role,
         department: formData.department,
-        // Provide some sensible defaults since the form is simple
-        employeeId: `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
+        employeeId: formData.employeeId || `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
         joinDate: new Date().toISOString().split('T')[0],
         employmentType: 'Full-time'
       });
@@ -45,7 +45,7 @@ export function AddUserModal({ isOpen, onClose, title, defaultRole }: AddUserMod
       onClose();
       // Reset form on success
       setFormData({
-        name: '', email: '', role: defaultRole || 'Employee', department: 'Engineering'
+        name: '', email: '', role: defaultRole || 'Employee', department: 'Engineering', employeeId: ''
       });
     } catch (err: any) {
       setError(err.message || 'Failed to create employee');
@@ -85,16 +85,27 @@ export function AddUserModal({ isOpen, onClose, title, defaultRole }: AddUserMod
             />
           </div>
           
-          <div>
-            <label className="block text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Email Address</label>
-            <input
-              required
-              type="email"
-              className="w-full h-10 px-3 rounded-lg bg-surface border border-border text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-              placeholder="name@canopy.io"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Email Address</label>
+              <input
+                required
+                type="email"
+                className="w-full h-10 px-3 rounded-lg bg-surface border border-border text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                placeholder="name@canopy.io"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">Employee ID (Optional)</label>
+              <input
+                className="w-full h-10 px-3 rounded-lg bg-surface border border-border text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                placeholder="Auto-generated if blank"
+                value={formData.employeeId}
+                onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

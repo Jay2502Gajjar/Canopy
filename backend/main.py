@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 from datetime import datetime, date, timedelta, timezone
 from uuid import UUID
 import json
@@ -174,6 +176,7 @@ def send_otp_email(to_email: str, otp_code: str):
     """Send OTP code via Gmail SMTP or log to console as fallback"""
     gmail_user = os.getenv("GMAIL_USER")
     gmail_pass = os.getenv("GMAIL_APP_PASSWORD")
+    print(f"DEBUG: Attempting to send OTP to {to_email} using {gmail_user}")
     if gmail_user and gmail_pass:
         try:
             msg = MIMEText(f"Your Canopy HR login verification code is: {otp_code}\n\nThis code expires in 5 minutes.", "plain")
@@ -185,11 +188,14 @@ def send_otp_email(to_email: str, otp_code: str):
                 server.login(gmail_user, gmail_pass)
                 server.sendmail(gmail_user, to_email, msg.as_string())
             logger.info(f"OTP email sent to {to_email}")
+            print(f"SUCCESS: Email sent to {to_email}")
         except Exception as e:
             logger.warning(f"SMTP failed, logging OTP instead: {e}")
             logger.info(f"========= OTP for {to_email}: {otp_code} =========")
+            print(f"ERROR: SMTP failed: {e}")
     else:
         logger.info(f"========= OTP for {to_email}: {otp_code} =========")
+        print(f"INFO: SMTP credentials not found, logging OTP: {otp_code}")
 
 @app.post("/api/auth/login")
 async def login(data: LoginModel, response: Response, db=Depends(get_db)):
@@ -345,18 +351,48 @@ async def get_profile(user_obj: UserObject = Depends(get_current_user), db=Depen
 async def update_profile(data: Dict[str, Any], user_obj: UserObject = Depends(get_current_user), db=Depends(get_db)):
     try:
         name = data.get("name")
-        if not name or not name.strip():
-            raise HTTPException(status_code=400, detail="Name is required")
-        first_name = name.strip().split(" ")[0]
-        await db.execute(
-            "UPDATE users SET name = $1, first_name = $2 WHERE id = $3",
-            name.strip(), first_name, user_obj.id
+        email = data.get("email")
+        
+        updates = []
+        params = []
+        param_idx = 1
+        
+        if name and name.strip():
+            updates.append(f"name = ${param_idx}")
+            params.append(name.strip())
+            param_idx += 1
+            
+            first_name = name.strip().split(" ")[0]
+            updates.append(f"first_name = ${param_idx}")
+            params.append(first_name)
+            param_idx += 1
+            
+        if email and email.strip():
+            if "@" not in email:
+                raise HTTPException(status_code=400, detail="Invalid email format")
+            updates.append(f"email = ${param_idx}")
+            params.append(email.strip().lower())
+            param_idx += 1
+            
+        if not updates:
+            raise HTTPException(status_code=400, detail="No valid fields to update")
+            
+        params.append(user_obj.id)
+        query = f"UPDATE users SET {', '.join(updates)} WHERE id = ${param_idx} RETURNING *"
+        
+        u = await db.fetchrow(query, *params)
+        if not u:
+            raise HTTPException(status_code=404, detail="User not found")
+            
+        return dict(
+            id=str(u["id"]), name=u["name"], firstName=u["first_name"], email=u["email"],
+            role=u["role"], department=u["department"], avatar=u["avatar"] or ""
         )
-        return {"message": "Profile updated", "name": name.strip(), "firstName": first_name}
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Profile update failed: {e}")
+        logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail="Profile update failed")
 
 @app.post("/api/auth/logout")
@@ -624,74 +660,103 @@ async def upload_transcript(data: Dict[str, Any], db=Depends(get_db)):
     try:
         emp_id = data.get("employeeId")
         content = data.get("content")
+        
         if not emp_id or not content:
             raise HTTPException(status_code=400, detail="employeeId and content are required")
+            
+        emp = await db.fetchrow("SELECT * FROM employees WHERE id = $1::uuid", emp_id)
+        if not emp:
+            raise HTTPException(status_code=404, detail="Employee not found")
 
+        # Standardize content into a list of {speaker, text} and a flat transcript_text
+        content_lines = []
         transcript_text = ""
+        
         if isinstance(content, list):
-            transcript_text = "\n".join([f"{line.get('speaker', 'Unknown')}: {line.get('text', '')}" for line in content])
+            for line in content:
+                speaker = line.get('speaker', 'Unknown')
+                text = line.get('text', '')
+                content_lines.append({"speaker": speaker, "text": text})
+                transcript_text += f"{speaker}: {text}\n"
         elif isinstance(content, str):
-            transcript_text = content
+            for line in content.split('\n'):
+                if line.strip():
+                    speaker = "Participant"
+                    text = line.strip()
+                    if ":" in text:
+                        parts = text.split(":", 1)
+                        speaker = parts[0].strip()
+                        text = parts[1].strip()
+                    content_lines.append({"speaker": speaker, "text": text})
+                    transcript_text += f"{speaker}: {text}\n"
 
-        ai_analysis = None
-        ai_status = "pending"
+        # 1. AI Analysis via Groq
+        from services.groq_service import analyze_transcript
+        analysis = await analyze_transcript(transcript_text)
+        
+        # 2. Vector Storage (Pinecone)
+        from services.pinecone_service import add_memory
         try:
-            ai_analysis = await analyze_transcript(transcript_text)
-            ai_status = "analysed"
-        except Exception as e:
-            logger.warning(f"Transcript analysis failed, saving without analysis: {e}")
+            await add_memory(
+                id_prefix=f"transcript_{emp_id}_{datetime.now().timestamp()}",
+                document=transcript_text,
+                metadata={
+                    "employee_id": str(emp["id"]),
+                    "employee_name": emp["name"],
+                    "type": "transcript",
+                    "meeting_type": data.get("meetingType", "check-in")
+                }
+            )
+        except Exception as pe:
+            logger.error(f"Pinecone memory failed: {pe}")
 
-        date_str = data.get("date")
-        date_val = datetime.fromisoformat(str(date_str).replace("Z", "+00:00")).date() if date_str else date.today()
-
+        # 3. Save to Postgres
+        date_val = datetime.now(timezone.utc).date()
         row = await db.fetchrow(
             """
             INSERT INTO transcripts (employee_id, employee_name, employee_dept, meeting_type, date, duration, ai_status, content, ai_analysis)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *
             """,
-            emp_id, data.get("employeeName"), data.get("employeeDept"), data.get("meetingType"), 
-            date_val, data.get("duration"), ai_status, 
-            json.dumps(content), json.dumps(ai_analysis) if ai_analysis else None
+            emp["id"], emp["name"], emp.get("department", ""), data.get("meetingType", "check-in"),
+            date_val, data.get("duration", "30m"), "analysed",
+            json.dumps(content_lines), json.dumps(analysis)
         )
-
-        # Extract and store commitments
-        if ai_analysis and ai_analysis.get("actionItems"):
-            for item in ai_analysis.get("actionItems"):
+        
+        # 4. Update Employee Sentiment & Commmitments
+        new_sentiment = analysis.get("sentimentScore", 50)
+        await db.execute(
+            "UPDATE employees SET sentiment_score = $1, updated_at = NOW() WHERE id = $2",
+            new_sentiment, emp["id"]
+        )
+        
+        await db.execute(
+            "INSERT INTO sentiment_history (employee_id, date, score) VALUES ($1, $2, $3)",
+            emp["id"], date_val, new_sentiment
+        )
+        
+        # Extract action items
+        if analysis.get("actionItems"):
+            for item in analysis["actionItems"]:
                 await db.execute(
                     """
                     INSERT INTO commitments (employee_id, employee_name, text, source_meeting, source_meeting_date, status)
                     VALUES ($1, $2, $3, $4, $5, 'on_track')
                     """,
-                    emp_id, data.get("employeeName"), item, data.get("meetingType", "meeting"), date_val
+                    emp["id"], emp["name"], item, data.get("meetingType", "meeting"), date_val
                 )
 
-        # Update employee sentiment
-        if ai_analysis and ai_analysis.get("sentimentScore"):
-            await db.execute("UPDATE employees SET sentiment_score = $1, updated_at = NOW() WHERE id = $2", ai_analysis["sentimentScore"], emp_id)
-            await db.execute("INSERT INTO sentiment_history (employee_id, date, score) VALUES ($1, $2, $3)", emp_id, date_val, ai_analysis["sentimentScore"])
-
-        # ChromaDB equivalent -> Pinecone
-        try:
-            memory_id = f"transcript-{row['id']}"
-            await add_memory(memory_id, transcript_text, {
-                "type": "transcript", "employee_id": emp_id, 
-                "employee_name": data.get("employeeName", ""), "meeting_type": data.get("meetingType", ""),
-                "date": date_val.isoformat()
-            })
-        except Exception as e:
-            logger.warning(f"Failed to store transcript in Pinecone: {e}")
-
-        # Log Activity
-        await log_event("profile_update", f"New {data.get('meetingType', 'meeting')} transcript uploaded and analyzed", emp_id, data.get("employeeName"))
+        # 5. Global Notification
+        await db.execute(
+            """
+            INSERT INTO notifications (source, summary, read, action_label, action_link)
+            VALUES ($1, $2, $3, $4, $5)
+            """,
+            "system", f"New meeting analyzed for {emp['name']}", False, "View Analysis", f"/hro/transcripts/{row['id']}"
+        )
         
-        return {
-            "id": str(row["id"]), "employeeId": str(row["employee_id"]), "employeeName": row["employee_name"],
-            "employeeDept": row["employee_dept"], "meetingType": row["meeting_type"], "date": row["date"].isoformat(),
-            "duration": row["duration"], "aiStatus": row["ai_status"],
-            "content": json.loads(row["content"]) if isinstance(row["content"], str) else row["content"],
-            "aiAnalysis": json.loads(row["ai_analysis"]) if isinstance(row["ai_analysis"], str) else row["ai_analysis"]
-        }
+        return dict(row)
+
     except Exception as e:
         logger.error(f"Transcript upload failed: {e}")
         raise HTTPException(status_code=500, detail="Transcript upload failed")
@@ -707,7 +772,7 @@ async def get_all_transcripts(db=Depends(get_db)):
         "aiAnalysis": json.loads(r["ai_analysis"]) if isinstance(r["ai_analysis"], str) else r["ai_analysis"]
     } for r in rows]
 
-@app.get("/api/transcripts/{emp_id}")
+@app.get("/api/transcripts/employee/{emp_id}")
 async def get_employee_transcripts(emp_id: str, db=Depends(get_db)):
     rows = await db.fetch("SELECT * FROM transcripts WHERE employee_id = $1 ORDER BY date DESC", emp_id)
     return [{
@@ -717,6 +782,29 @@ async def get_employee_transcripts(emp_id: str, db=Depends(get_db)):
         "content": json.loads(r["content"]) if isinstance(r["content"], str) else r["content"],
         "aiAnalysis": json.loads(r["ai_analysis"]) if isinstance(r["ai_analysis"], str) else r["ai_analysis"]
     } for r in rows]
+
+@app.get("/api/transcripts/{t_id}")
+async def get_transcript_by_id(t_id: str, db=Depends(get_db)):
+    # Try as transcript ID first
+    r = await db.fetchrow("SELECT * FROM transcripts WHERE id = $1::uuid", t_id)
+    if not r:
+        # Fallback: treat as employee_id for backwards compat
+        rows = await db.fetch("SELECT * FROM transcripts WHERE employee_id = $1 ORDER BY date DESC", t_id)
+        return [{
+            "id": str(row["id"]), "employeeId": str(row["employee_id"]), "employeeName": row["employee_name"],
+            "employeeDept": row["employee_dept"], "meetingType": row["meeting_type"], "date": row["date"].isoformat(),
+            "duration": row["duration"], "aiStatus": row["ai_status"],
+            "content": json.loads(row["content"]) if isinstance(row["content"], str) else row["content"],
+            "aiAnalysis": json.loads(row["ai_analysis"]) if isinstance(row["ai_analysis"], str) else row["ai_analysis"]
+        } for row in rows]
+    return {
+        "id": str(r["id"]), "employeeId": str(r["employee_id"]), "employeeName": r["employee_name"],
+        "employeeDept": r["employee_dept"], "meetingType": r["meeting_type"], "date": r["date"].isoformat(),
+        "duration": r["duration"], "aiStatus": r["ai_status"],
+        "content": json.loads(r["content"]) if isinstance(r["content"], str) else r["content"],
+        "aiAnalysis": json.loads(r["ai_analysis"]) if isinstance(r["ai_analysis"], str) else r["ai_analysis"]
+    }
+
 
 # ============================================
 # AI ROUTES
@@ -813,24 +901,32 @@ async def ai_meeting_brief(emp_id: Optional[str] = None, data: Optional[Dict[str
         
         if not brief:
             emp = dict(employee)
-            lines = [f"Meeting Prep for {emp.get('name', 'Employee')}"]
-            lines.append(f"Role: {emp.get('role', 'N/A')} | Department: {emp.get('department', 'N/A')}")
-            lines.append(f"Sentiment Score: {emp.get('sentiment_score', 'N/A')}/100 | Risk Tier: {emp.get('risk_tier', 'N/A')}")
+            key_context = [
+                f"{emp.get('name', 'Employee')} is a {emp.get('role', 'team member')} in {emp.get('department', 'the company')}",
+                f"Current sentiment score: {emp.get('sentiment_score', 'N/A')}/100",
+                f"Risk tier: {emp.get('risk_tier', 'N/A')}",
+            ]
             if commitments:
-                lines.append(f"\nOpen Commitments ({len(commitments)}):")
-                for c in commitments[:3]:
-                    lines.append(f"  - {c['text']} (Status: {c['status']})")
+                key_context.append(f"{len(commitments)} open commitment(s) pending follow-up")
             if notes:
-                lines.append(f"\nRecent Notes ({len(notes)}):")
-                for n in notes[:2]:
-                    lines.append(f"  - {str(n['content'])[:100]}...")
-            lines.append("\nSuggested Discussion Points:")
-            lines.append("  - Check in on current workload and any blockers")
-            lines.append("  - Discuss career development goals")
-            lines.append("  - Review team dynamics and collaboration")
-            brief = "\n".join(lines)
+                key_context.append(f"Last note: {str(notes[0]['content'])[:80]}...")
+            
+            suggested_topics = [
+                "Check in on current workload and any blockers",
+                "Discuss career development goals and growth",
+                "Review team dynamics and collaboration",
+            ]
+            if commitments:
+                for c in commitments[:2]:
+                    suggested_topics.append(f"Follow up: {c['text']}")
+            
+            brief = {
+                "keyContext": key_context,
+                "suggestedTopics": suggested_topics,
+                "brief": f"Prepare for a check-in with {emp.get('name', 'the employee')}. Review their current sentiment and outstanding commitments."
+            }
         
-        return {"brief": brief}
+        return brief
     except HTTPException:
         raise
     except Exception as e:
@@ -1231,8 +1327,12 @@ async def ats_filter(data: Dict[str, Any]):
             "rejected": rejected,
             "requiredSkills": required_skills,
             "totalAccepted": len(accepted),
-            "totalRejected": len(rejected)
         }
     except Exception as e:
         logger.error(f"ATS filter failed: {e}")
         raise HTTPException(status_code=500, detail="Filtering failed")
+
+# ============================================
+# TRANSCRIPTS
+# ============================================
+

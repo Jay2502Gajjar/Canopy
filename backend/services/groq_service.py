@@ -64,13 +64,14 @@ async def analyze_transcript(transcript_text: str) -> dict:
     try:
         client = get_client()
         prompt = (
-            "Analyze the following HR meeting transcript and output ONLY valid JSON containing:\n"
+            "Analyze the following HR meeting transcript and output ONLY valid JSON containing exactly these keys:\n"
             "{\n"
-            '  "summary": "2-3 sentence summary",\n'
+            '  "keyHighlights": ["highlight 1", "highlight 2"],\n'
             '  "sentimentScore": <integer 1-100>,\n'
-            '  "actionItems": ["action 1", "action 2"],\n'
+            '  "sentimentLabel": "Positive, Neutral, or Negative",\n'
             '  "keyTopics": ["topic 1", "topic 2"],\n'
-            '  "burnoutIndicators": ["indicator 1" or empty]\n'
+            '  "concerns": ["concern 1" or empty],\n'
+            '  "actionItems": ["action 1", "action 2"]\n'
             "}\n\n"
             f"Transcript:\n{transcript_text}"
         )
@@ -87,11 +88,12 @@ async def analyze_transcript(transcript_text: str) -> dict:
     except Exception as e:
         logger.error(f"Failed to analyze transcript: {e}")
         return {
-            "summary": "Analysis failed",
+            "keyHighlights": ["Analysis failed to generate."],
             "sentimentScore": 50,
-            "actionItems": [],
+            "sentimentLabel": "Neutral",
             "keyTopics": [],
-            "burnoutIndicators": []
+            "concerns": [],
+            "actionItems": []
         }
 
 async def employee_insights(employee: dict) -> list[str]:
@@ -127,7 +129,7 @@ async def employee_insights(employee: dict) -> list[str]:
         logger.error(f"Employee insight failed: {e}")
         return ["Unable to generate insights right now."]
 
-async def generate_meeting_brief(employee: dict, transcripts: list, notes: list, commitments: list) -> str:
+async def generate_meeting_brief(employee: dict, transcripts: list, notes: list, commitments: list) -> dict:
     try:
         client = get_client()
         
@@ -140,9 +142,16 @@ async def generate_meeting_brief(employee: dict, transcripts: list, notes: list,
         
         prompt = (
             "You are an HR assistant preparing a brief for a manager conducting a check-in meeting. "
-            "Based on this employee data, write a short, highly professional meeting preparation brief. "
-            "Structure: 1) Status Summary, 2) Conversation Starters, 3) Items to Follow up on.\n"
-            "Keep it concise, bulleted, and ready to read in 2 minutes.\n\n"
+            "Based on this employee data, return a JSON object with exactly these fields:\n"
+            "{\n"
+            '  "keyContext": ["<3-5 key context points about the employee\'s current situation>"],\n'
+            '  "suggestedTopics": ["<3-5 suggested discussion topics for the meeting>"],\n'
+            '  "brief": "<A 2-3 sentence overall summary>"\n'
+            "}\n\n"
+            "Rules:\n"
+            "- keyContext should include recent sentiment, risk level, past concerns, and important history\n"
+            "- suggestedTopics should be concrete, actionable conversation starters\n"
+            "- Return ONLY valid JSON, no markdown, no code fences, no extra text\n\n"
             f"{json.dumps(data, default=str)}"
         )
         
@@ -151,7 +160,22 @@ async def generate_meeting_brief(employee: dict, transcripts: list, notes: list,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3
         )
-        return completion.choices[0].message.content
+        
+        response_text = completion.choices[0].message.content.strip()
+        # Strip markdown code fences if present
+        if response_text.startswith("```"):
+            response_text = response_text.split("\n", 1)[1] if "\n" in response_text else response_text[3:]
+            if response_text.endswith("```"):
+                response_text = response_text[:-3].strip()
+        
+        result = json.loads(response_text)
+        # Ensure all fields exist
+        return {
+            "keyContext": result.get("keyContext", []),
+            "suggestedTopics": result.get("suggestedTopics", []),
+            "brief": result.get("brief", "")
+        }
     except Exception as e:
         logger.error(f"Meeting brief failed: {e}")
         raise e
+

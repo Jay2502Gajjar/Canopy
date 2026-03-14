@@ -9,11 +9,7 @@ import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/useAppStore';
 import { authApi } from '@/lib/api';
 
-const presetUsers = [
-  { role: 'HRO', name: 'Sarah Mitchell', email: 'sarah.mitchell@canopy.io', password: 'admin123', desc: 'HR Operations' },
-  { role: 'CHRO', name: 'James Wilson', email: 'james.wilson@canopy.io', password: 'admin123', desc: 'Chief HR Officer' },
-  { role: 'HRBP', name: 'Priya Sharma', email: 'priya.sharma@canopy.io', password: 'admin123', desc: 'HR Business Partner' },
-];
+const presetUsers = [];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -73,26 +69,8 @@ export default function LoginPage() {
     }
   };
 
-  const handleQuickLogin = (preset: typeof presetUsers[0]) => {
-    setEmail(preset.email);
-    setPassword(preset.password);
-    setIsLoading(true);
-    setError('');
-    authApi.login({ email: preset.email, password: preset.password } as any)
-      .then((res) => {
-        if (res.requires2FA) {
-          setUserId(res.userId);
-          setStep('otp');
-          setSuccessMsg(res.message);
-        } else {
-          const role = res.user?.role || 'hro';
-          router.push(`/${role}/dashboard`);
-        }
-      })
-      .catch((err) => {
-        setError(err.message || 'Login failed');
-      })
-      .finally(() => setIsLoading(false));
+  const handleQuickLogin = (preset: any) => {
+    // Disabled
   };
 
   return (
@@ -183,24 +161,7 @@ export default function LoginPage() {
             </form>
           )}
           
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-[11px] text-text-muted uppercase tracking-wide font-semibold mb-3 text-center">Quick Login</p>
-            <div className="space-y-2">
-              {presetUsers.map((u) => (
-                <button key={u.role} onClick={() => handleQuickLogin(u)}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary/40 hover:bg-primary/5 transition-all text-left group">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                    {u.role}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold group-hover:text-primary transition-colors">{u.name}</p>
-                    <p className="text-xs text-text-muted">{u.desc} · {u.email}</p>
-                  </div>
-                  <ArrowRight size={14} className="text-text-muted group-hover:text-primary transition-colors" />
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Quick Login Removed */}
         </div>
         <p className="text-center text-xs text-text-muted mt-4">Canopy · AI-Powered HR Intelligence · 2026</p>
       </motion.div>

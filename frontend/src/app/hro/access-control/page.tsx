@@ -6,7 +6,7 @@ import { Shield, Users, FileText, Settings, Search, Plus, X } from 'lucide-react
 import { cn, formatDate } from '@/lib/utils';
 
 const mockUsers = [
-  { id: '1', name: 'Sarah Mitchell', email: 'sarah@canopy.io', role: 'HRO', departments: ['All'], lastLogin: '2026-03-13', status: 'active' },
+  { id: '1', name: 'Jay Gajjar', email: 'jaygajjar2502@gmail.com', role: 'HRO', departments: ['All'], lastLogin: '2026-03-13', status: 'active' },
   { id: '2', name: 'Vikram Singh', email: 'vikram@canopy.io', role: 'CHRO', departments: ['All'], lastLogin: '2026-03-13', status: 'active' },
   { id: '3', name: 'Priya Sharma', email: 'priya@canopy.io', role: 'HRBP', departments: ['Engineering', 'Product'], lastLogin: '2026-03-12', status: 'active' },
   { id: '4', name: 'Arjun Rao', email: 'arjun.rao@canopy.io', role: 'HRBP', departments: ['Design'], lastLogin: '2026-03-10', status: 'active' },
@@ -14,9 +14,9 @@ const mockUsers = [
 ];
 
 const mockAuditLog = [
-  { id: 'a1', timestamp: '2026-03-13T16:00:00Z', user: 'Sarah Mitchell', action: 'Viewed employee profile', data: 'Deepak Verma', ip: '192.168.1.45' },
+  { id: 'a1', timestamp: '2026-03-13T16:00:00Z', user: 'Jay Gajjar', action: 'Viewed employee profile', data: 'Deepak Verma', ip: '192.168.1.45' },
   { id: 'a2', timestamp: '2026-03-13T14:30:00Z', user: 'AI System', action: 'Generated risk flag', data: 'Engineering dept', ip: 'System' },
-  { id: 'a3', timestamp: '2026-03-13T10:00:00Z', user: 'Sarah Mitchell', action: 'Approved leave', data: 'Meera Nair', ip: '192.168.1.45' },
+  { id: 'a3', timestamp: '2026-03-13T10:00:00Z', user: 'Jay Gajjar', action: 'Approved leave', data: 'Meera Nair', ip: '192.168.1.45' },
 ];
 
 const tabs = ['Users', 'Audit Log', 'Consent Management'];
