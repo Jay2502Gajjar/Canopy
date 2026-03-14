@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { PenLine, Search, Plus, Save, X, Sparkles, Loader2 } from 'lucide-react';
+import { PenLine, Search, Plus, Save, X, Sparkles, Loader2, Trash2 } from 'lucide-react';
 import { cn, formatDate, getInitials } from '@/lib/utils';
 import { noteApi, employeeApi } from '@/lib/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/useAppStore';
+import { StaggerContainer, FadeInOnScroll } from '@/components/shared/FadeInOnScroll';
 
 export default function ManualNotesPage() {
   const { user } = useAppStore();
@@ -29,6 +30,15 @@ export default function ManualNotesPage() {
       setShowEditor(false);
       setNoteContent('');
       setSelectedEmployee('');
+    },
+  });
+
+  const deleteNoteMutation = useMutation({
+    mutationFn: (id: string) => noteApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-changes'] });
+      setSelectedNote(null);
     },
   });
 
@@ -64,12 +74,10 @@ export default function ManualNotesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Notes List */}
-        <div className="lg:col-span-2 space-y-3">
+        <StaggerContainer className="lg:col-span-2 space-y-3" direction="up" staggerMs={60}>
           {filtered.map((note) => (
-            <motion.div
+            <div
               key={note.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
               onClick={() => setSelectedNote(note)}
               className={cn(
                 'bg-surface-card border border-border rounded-xl p-4 cursor-pointer hover:border-primary/30 transition-all',
@@ -86,6 +94,13 @@ export default function ManualNotesPage() {
                     <p className="text-xs text-text-muted">{formatDate(note.date)} · by {note.author}</p>
                   </div>
                 </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteNoteMutation.mutate(note.id); }}
+                  title="Delete note"
+                  className="text-danger/50 hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors flex-shrink-0"
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
               <p className="text-sm text-text-muted mt-2 line-clamp-2">{note.preview}</p>
               {note.aiHighlights && note.aiHighlights.length > 0 && (
@@ -94,12 +109,12 @@ export default function ManualNotesPage() {
                   <span className="text-[11px] text-primary font-medium">AI highlighted {note.aiHighlights.length} insights</span>
                 </div>
               )}
-            </motion.div>
+            </div>
           ))}
-        </div>
+        </StaggerContainer>
 
         {/* Note Detail / Editor */}
-        <div className="bg-surface-card border border-border rounded-xl p-5 sticky top-20">
+        <FadeInOnScroll direction="left" className="bg-surface-card border border-border rounded-xl p-5 sticky top-20">
           {(loadingNotes || loadingEmp) && (
             <div className="flex justify-center items-center h-40">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -168,7 +183,7 @@ export default function ManualNotesPage() {
               <p className="text-sm">Select a note to view details</p>
             </div>
           )}
-        </div>
+        </FadeInOnScroll>
       </div>
     </div>
   );

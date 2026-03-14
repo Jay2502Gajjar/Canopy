@@ -6,6 +6,7 @@ import { Briefcase, Award, UserPlus, RefreshCw, LogOut, FileText, Loader2 } from
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { recentChangesApi } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
+import { StaggerContainer } from '@/components/shared/FadeInOnScroll';
 
 const typeIcons: Record<string, React.ElementType> = {
   leave_approval: FileText,
@@ -41,36 +42,32 @@ export default function RecentChangesPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold font-heading">Recent Changes</h1>
-      <div className="space-y-3">
+      <StaggerContainer className="space-y-3" direction="left" staggerMs={40}>
         {activities.length === 0 ? (
           <p className="text-sm text-text-muted mt-4">No recent changes found.</p>
-        ) : activities.map((activity: any, i: number) => {
+        ) : activities.map((activity: any) => {
           const Icon = typeIcons[activity.eventType] || FileText;
           return (
-            <motion.div
+            <div
               key={activity.id}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
               className="bg-surface-card border border-border rounded-xl p-4 flex items-start gap-4"
             >
               <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0', typeColors[activity.eventType] || 'bg-primary/10 text-primary')}>
                 <Icon size={16} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm">
-                  {activity.employeeName && <span className="font-semibold">{activity.employeeName} — </span>}
-                  {activity.description}
-                </p>
-                <p className="text-xs text-text-muted mt-1">
-                  {formatRelativeTime(activity.timestamp)}
-                  {activity.employeeName ? '' : ' · System Event'}
+                <p className="text-sm font-semibold">{activity.employeeName} <span className="font-normal text-text-muted ml-1">{activity.description}</span></p>
+                <p className="text-xs text-text-muted mt-1 flex items-center gap-2">
+                  <span>{formatRelativeTime(activity.timestamp)}</span>
+                  {activity.metadata?.oldRole && activity.metadata?.newRole && (
+                    <span>· {activity.metadata.oldRole} → {activity.metadata.newRole}</span>
+                  )}
                 </p>
               </div>
-            </motion.div>
+            </div>
           );
         })}
-      </div>
+      </StaggerContainer>
     </div>
   );
 }

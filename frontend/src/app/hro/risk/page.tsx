@@ -7,6 +7,7 @@ import { cn, formatDate } from '@/lib/utils';
 import { RiskBadge } from '@/components/risk/RiskBadge';
 import { mockRiskEmployees } from '@/lib/mock-data';
 import { riskIndicatorLabels } from '@/types/risk';
+import { FadeInOnScroll } from '@/components/shared/FadeInOnScroll';
 
 export default function RiskAnalysisPage() {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -51,8 +52,7 @@ export default function RiskAnalysisPage() {
       </div>
 
       {/* Risk Table */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-surface-card border border-border rounded-xl overflow-hidden">
+      <FadeInOnScroll direction="up" className="bg-surface-card border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
@@ -149,7 +149,7 @@ export default function RiskAnalysisPage() {
             ))}
           </tbody>
         </table>
-      </motion.div>
+      </FadeInOnScroll>
     </div>
   );
 }

@@ -1072,6 +1072,21 @@ async def create_meeting(data: Dict[str, Any], db=Depends(get_db)):
         logger.error(f"Failed to create meeting: {e}")
         raise HTTPException(status_code=500, detail="Failed to create meeting")
 
+@app.delete("/api/meetings/{meeting_id}")
+async def delete_meeting(meeting_id: str, db=Depends(get_db)):
+    try:
+        meeting = await db.fetchrow("SELECT employee_name FROM meetings WHERE id = $1::uuid", meeting_id)
+        if not meeting:
+            raise HTTPException(status_code=404, detail="Meeting not found")
+        await db.execute("DELETE FROM meetings WHERE id = $1::uuid", meeting_id)
+        await log_event("meeting_deleted", f"Meeting with {meeting['employee_name']} cancelled", None, meeting['employee_name'])
+        return {"message": "Meeting deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to delete meeting: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete meeting")
+
 @app.get("/api/commitments")
 async def get_commitments(db=Depends(get_db)):
     rows = await db.fetch("SELECT * FROM commitments ORDER BY due_date ASC")

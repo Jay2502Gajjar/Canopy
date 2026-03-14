@@ -7,6 +7,7 @@ import { Search, Upload, FileText, Filter, Loader2 } from 'lucide-react';
 import { cn, formatDate } from '@/lib/utils';
 import { transcriptApi, employeeApi } from '@/lib/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { FadeInOnScroll } from '@/components/shared/FadeInOnScroll';
 
 export default function TranscriptsPage() {
   const [search, setSearch] = useState('');
@@ -73,8 +74,7 @@ export default function TranscriptsPage() {
       </div>
 
       {/* Table */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-surface-card border border-border rounded-xl overflow-hidden">
+      <FadeInOnScroll direction="up" className="bg-surface-card border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
@@ -117,7 +117,7 @@ export default function TranscriptsPage() {
             ))}
           </tbody>
         </table>
-      </motion.div>
+      </FadeInOnScroll>
 
       {/* Upload Modal */}
       {showUpload && (

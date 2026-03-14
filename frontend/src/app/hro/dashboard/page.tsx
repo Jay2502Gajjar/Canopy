@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  Users, Calendar, AlertTriangle, BarChart2, TrendingDown, TrendingUp, Minus, CalendarCheck, Sparkles, Plus
+  Users, Calendar, AlertTriangle, BarChart2, TrendingDown, TrendingUp, Minus, CalendarCheck, Sparkles, Plus, Trash2, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { cn, getGreeting, formatDate, getInitials, formatRelativeTime } from '@/lib/utils';
 import { MetricCard } from '@/components/dashboard/MetricCard';
@@ -12,9 +12,10 @@ import { MemoryScoreBar } from '@/components/employees/MemoryScoreBar';
 import { SentimentSparkline } from '@/components/shared/SentimentSparkline';
 import { PrepModal } from '@/components/shared/PrepModal';
 import { AddUserModal } from '@/components/shared/AddUserModal';
+import { FadeInOnScroll, StaggerContainer } from '@/components/shared/FadeInOnScroll';
 import { useAppStore } from '@/store/useAppStore';
 import { employeeApi, meetingApi, commitmentApi, analyticsApi } from '@/lib/api';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 
 export default function HRODashboard() {
@@ -23,6 +24,16 @@ export default function HRODashboard() {
   const [isClient, setIsClient] = useState(false);
   const [commitments, setCommitments] = useState<any[]>([]);
   const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
+  const [isCommitmentsExpanded, setIsCommitmentsExpanded] = useState(false);
+  const queryClient = useQueryClient();
+
+  const deleteMeetingMutation = useMutation({
+    mutationFn: (id: string) => meetingApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-changes'] });
+    },
+  });
 
   const { user } = useAppStore();
   const { data: employees = [], isLoading: isLoadingEmp } = useQuery({ queryKey: ['employees'], queryFn: employeeApi.getAll });
@@ -86,15 +97,15 @@ export default function HRODashboard() {
       </div>
 
       {/* Row 1: Metrics with expandable employees */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" direction="up" staggerMs={80}>
         <MetricCard title="Total Employees" value={employees.length} icon={Users} delta={3} deltaLabel="this month" employees={employees.slice(0, 5)} onPrepClick={setPrepEmpId} />
         <MetricCard title="On Leave" value={leaveEmployees.length} icon={Calendar} subtitle="3 sick, 5 annual" employees={leaveEmployees} onPrepClick={setPrepEmpId} />
         <MetricCard title="At Retention Risk" value={riskEmployees.length} icon={AlertTriangle} delta={2} deltaLabel="from last month" employees={riskEmployees} onPrepClick={setPrepEmpId} />
         <MetricCard title="Upcoming Meetings" value={upcomingMeetings.length} icon={CalendarCheck} subtitle="Next 7 days" meetings={upcomingMeetings} onPrepClick={setPrepEmpId} />
-      </div>
+      </StaggerContainer>
 
       {/* Row 2: Three Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <StaggerContainer className="grid grid-cols-1 lg:grid-cols-3 gap-4" direction="up" staggerMs={150}>
         {/* Needs Attention */}
         <div className="bg-surface-card border border-border rounded-xl p-5 hover:shadow-lg hover:border-primary/20 transition-all duration-200">
           <div className="flex items-center justify-between mb-4">
@@ -121,41 +132,50 @@ export default function HRODashboard() {
 
         {/* Pending Commitments — mark below instead of remove */}
         <div className="bg-surface-card border border-border rounded-xl p-5 hover:shadow-lg hover:border-primary/20 transition-all duration-200">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold font-heading">Pending Commitments</h2>
+          <div 
+            className="flex items-center justify-between mb-4 cursor-pointer group"
+            onClick={() => setIsCommitmentsExpanded(!isCommitmentsExpanded)}
+          >
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold font-heading group-hover:text-primary transition-colors">Pending Commitments</h2>
+              {isCommitmentsExpanded ? <ChevronUp size={16} className="text-text-muted" /> : <ChevronDown size={16} className="text-text-muted" />}
+            </div>
             <span className="text-xs text-text-muted">{openCommitments.length} open</span>
           </div>
-          <div className="space-y-2">
-            {openCommitments.map((c: any) => (
-              <div key={c.id} className={cn('flex items-start gap-3 p-2.5 rounded-lg border-l-[3px]',
-                c.status === 'overdue' ? 'border-l-danger bg-danger/[0.03]' : c.status === 'due_soon' ? 'border-l-warning bg-warning/[0.03]' : 'border-l-success bg-success/[0.03]')}>
-                <input type="checkbox" checked={c.resolved} onChange={() => toggleCommitment(c.id)} className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium">{c.text}</p>
-                    <span className={cn('flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full flex-shrink-0',
-                      c.status === 'overdue' ? 'bg-danger/10 text-danger' : c.status === 'due_soon' ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success')}>
-                      <Sparkles size={8} /> {c.status === 'overdue' ? 'High Priority' : c.status === 'due_soon' ? 'Med Priority' : 'Low Priority'}
-                    </span>
+          
+          {isCommitmentsExpanded && (
+            <div className="space-y-2">
+              {openCommitments.map((c: any) => (
+                <div key={c.id} className={cn('flex items-start gap-3 p-2.5 rounded-lg border-l-[3px]',
+                  c.status === 'overdue' ? 'border-l-danger bg-danger/[0.03]' : c.status === 'due_soon' ? 'border-l-warning bg-warning/[0.03]' : 'border-l-success bg-success/[0.03]')}>
+                  <input type="checkbox" checked={c.resolved} onChange={() => toggleCommitment(c.id)} className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium">{c.text}</p>
+                      <span className={cn('flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full flex-shrink-0',
+                        c.status === 'overdue' ? 'bg-danger/10 text-danger' : c.status === 'due_soon' ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success')}>
+                        <Sparkles size={8} /> {c.status === 'overdue' ? 'High Priority' : c.status === 'due_soon' ? 'Med Priority' : 'Low Priority'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-text-muted mt-0.5">{c.employeeName} · Due {formatDate(c.dueDate)}</p>
                   </div>
-                  <p className="text-xs text-text-muted mt-0.5">{c.employeeName} · Due {formatDate(c.dueDate)}</p>
                 </div>
-              </div>
-            ))}
-            {markedCommitments.length > 0 && (
-              <>
-                <div className="border-t border-border mt-2 pt-2">
-                  <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1.5">Resolved ({markedCommitments.length})</p>
-                </div>
-                {markedCommitments.map((c: any) => (
-                  <div key={c.id} className="flex items-start gap-3 p-2.5 rounded-lg bg-surface/50 opacity-60">
-                    <input type="checkbox" checked={true} onChange={() => toggleCommitment(c.id)} className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer" />
-                    <p className="text-sm font-medium line-through flex-1">{c.text}</p>
+              ))}
+              {markedCommitments.length > 0 && (
+                <>
+                  <div className="border-t border-border mt-2 pt-2">
+                    <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1.5">Resolved ({markedCommitments.length})</p>
                   </div>
-                ))}
-              </>
-            )}
-          </div>
+                  {markedCommitments.map((c: any) => (
+                    <div key={c.id} className="flex items-start gap-3 p-2.5 rounded-lg bg-surface/50 opacity-60">
+                      <input type="checkbox" checked={true} onChange={() => toggleCommitment(c.id)} className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer" />
+                      <p className="text-sm font-medium line-through flex-1">{c.text}</p>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Upcoming Meetings */}
@@ -173,14 +193,18 @@ export default function HRODashboard() {
                 </div>
                 <button onClick={() => setPrepEmpId(m.employeeId)}
                   className="text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-lg hover:bg-primary/20 transition-colors">Prep</button>
+                <button onClick={() => deleteMeetingMutation.mutate(m.id)} title="Cancel meeting"
+                  className="text-xs text-danger/70 hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors">
+                  <Trash2 size={14} />
+                </button>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </StaggerContainer>
 
       {/* Row 3: Sentiment + Dept */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <StaggerContainer className="grid grid-cols-1 lg:grid-cols-5 gap-4" direction="up" staggerMs={150}>
         <div className="lg:col-span-2 bg-surface-card border border-border rounded-xl p-5 hover:shadow-lg hover:border-primary/20 transition-all duration-200">
           <h2 className="text-sm font-semibold font-heading mb-4">Org Sentiment Health</h2>
           <div className="text-center">
@@ -219,10 +243,10 @@ export default function HRODashboard() {
             ))}
           </div>
         </div>
-      </div>
+      </StaggerContainer>
 
       {/* Row 4: Employee Table */}
-      <div className="bg-surface-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-200">
+      <StaggerContainer direction="up" className="bg-surface-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-200">
         <div className="flex items-center justify-between p-5 pb-0">
           <h2 className="text-sm font-semibold font-heading">Employee Memory Overview</h2>
         </div>
@@ -262,7 +286,7 @@ export default function HRODashboard() {
             </tbody>
           </table>
         </div>
-      </div>
+      </StaggerContainer>
 
       {/* Recently Viewed */}
       <div className="flex items-center gap-3 overflow-x-auto pb-2">

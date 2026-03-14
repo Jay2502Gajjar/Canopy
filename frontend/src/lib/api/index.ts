@@ -55,6 +55,7 @@ export const meetingApi = {
   getUpcoming: () => request<any[]>('/api/meetings/upcoming'),
   getById: (id: string) => request<any>(`/api/meetings/${id}`),
   create: (data: any) => request<any>('/api/meetings', { method: 'POST', body: data }),
+  delete: (id: string) => request<void>(`/api/meetings/${id}`, { method: 'DELETE' }),
 };
 
 // Commitment endpoints

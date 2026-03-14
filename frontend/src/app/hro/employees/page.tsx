@@ -7,6 +7,7 @@ import { cn, getInitials, formatDate } from '@/lib/utils';
 import { RiskBadge } from '@/components/risk/RiskBadge';
 import { EmployeeCard } from '@/components/employees/EmployeeCard';
 import { AddUserModal } from '@/components/shared/AddUserModal';
+import { StaggerContainer } from '@/components/shared/FadeInOnScroll';
 import { employeeApi } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -91,24 +92,20 @@ export default function EmployeeDirectoryPage() {
         </div>
       ) : (
         <>
-          <motion.div
-            initial="hidden"
-            animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.05 } } }}
+          <StaggerContainer
+            direction="up"
+            staggerMs={60}
             className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
           >
             {filtered.map((emp: any) => (
-              <motion.div
-                key={emp.id}
-                variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
-              >
+              <div key={emp.id}>
                 <EmployeeCard
                   employee={{...emp, joiningDate: emp.joinDate, manager: emp.reportingManager}} // Map fields to match what EmployeeCard expects if needed
                   onClick={() => router.push(`/hro/employees/${emp.id}`)}
                 />
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </StaggerContainer>
 
           {filtered.length === 0 && (
             <div className="text-center py-12 text-text-muted">
