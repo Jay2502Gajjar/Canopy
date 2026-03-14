@@ -1,0 +1,102 @@
+{
+  "311011000000294293": [
+    {
+      "EmailID": "christopherbrown@zylker.com",
+      "CreatedTime": "1773468945205",
+      "Employee_type.id": "311011000000039959",
+      "Date_of_birth": "02-Feb-1987",
+      "UAN_Number": "",
+      "AddedTime": "14-Mar-2026 11:45:45",
+      "Photo": "https://people.zoho.in/api/viewEmployeePhoto?filename=8962819000000003009",
+      "Gender": "Male",
+      "Marital_status": "Married",
+      "ModifiedBy": "1 - Jay - Gajjar",
+      "ApprovalStatus": "Approval Not Enabled",
+      "Department": "Management",
+      "LocationName.ID": "",
+      "tabularSections": {
+        "Education Details": [
+          {
+            "Specialization": "Sales Engineering",
+            "Degree": "Masters",
+            "College": "Serenity University",
+            "Yearofgraduation": "",
+            "tabular.ROWID": "311011000000294492"
+          }
+        ],
+        "Work experience": [
+          {
+            "Jobtitle": "Administration",
+            "Employer": "Electronic Smarts",
+            "RELEVANCE": "Yes",
+            "Previous_JobDesc": "",
+            "FromDate": "01-Feb-2007",
+            "Todate": "05-Dec-2014",
+            "tabular.ROWID": "311011000000294543",
+            "RELEVANCE.id": "311011000000198025"
+          }
+        ],
+        "Dependent Details": [
+          {}
+        ]
+      },
+      "AddedBy": "1 - Jay - Gajjar",
+      "Mobile.country_code": "",
+      "Tags": "",
+      "Reporting_To": "Jay Gajjar 1",
+      "Photo_downloadUrl": "https://people.zoho.in/api/viewEmployeePhoto?filename=8962819000000003009",
+      "Source_of_hire.id": "0",
+      "total_experience.displayValue": "19 year(s)",
+      "Employeestatus": "Active",
+      "Role": "Team member",
+      "Experience": "11",
+      "Employee_type": "Permanent",
+      "AddedBy.ID": "311011000000294005",
+      "Role.ID": "311011000000035635",
+      "LastName": "Brown",
+      "Pan_Number": "",
+      "EmployeeID": "S20",
+      "ZUID": "-1",
+      "Aadhaar_Number": "",
+      "Dateofexit": "",
+      "Permanent_Address": "",
+      "Other_Email": "",
+      "LocationName": "",
+      "Work_location": "FL_ADMIN_4",
+      "Present_Address": "360 NW,98th St,Miami,Florida,UNITED STATES,33150",
+      "Nick_Name": "Chris",
+      "total_experience": "228",
+      "ModifiedTime": "1773468945205",
+      "Reporting_To.MailID": "jaygajjar2521@gmail.com",
+      "Zoho_ID": 311011000000294300,
+      "Designation.ID": "311011000000294319",
+      "Source_of_hire": "",
+      "Age": "39",
+      "Designation": "Administration",
+      "Age.displayValue": "39 year(s) 1 month(s)",
+      "Marital_status.id": "311011000000039987",
+      "FirstName": "Christopher",
+      "AboutMe": "",
+      "Dateofjoining": "05-Jan-2015",
+      "Experience.displayValue": "11 year(s) 2 month(s)",
+      "Mobile": "239-222-4633",
+      "Extension": "5",
+      "ModifiedBy.ID": "311011000000294005",
+      "Reporting_To.ID": "311011000000294005",
+      "Work_phone": "727-555-5656",
+      "Employeestatus.type": 1,
+      "Department.ID": "311011000000294245",
+      "Present_Address.childValues": {
+        "CITY": "Miami",
+        "COUNTRY": "UNITED STATES",
+        "STATE": "Florida",
+        "ADDRESS1": "360 NW",
+        "PINCODE": "33150",
+        "ADDRESS2": "98th St",
+        "STATE_CODE": "US-FL",
+        "COUNTRY_CODE": "US"
+      },
+      "Expertise": ""
+    }
+  ]
+}

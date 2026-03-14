@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: #0F766E;
+  --color-primary-dark: #115E59;
+  --color-primary-light: #14B8A6;
+  --color-secondary: #0EA5E9;
+  --color-danger: #EF4444;
+  --color-warning: #D97706;
+  --color-success: #22C55E;
+  --color-surface: var(--surface);
+  --color-surface-card: var(--surface-card);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: #64748B;
+  --color-border: var(--border-color);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-heading: 'DM Sans', system-ui, sans-serif;
+}
+
+:root {
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --surface: #F8FAFC;
+  --surface-card: #FFFFFF;
+  --text-primary: #0F172A;
+  --border-color: #E2E8F0;
+}
+
+.dark {
+  --background: #0B1120;
+  --foreground: #F8FAFC;
+  --surface: #0F1729;
+  --surface-card: #1A2332;
+  --text-primary: #F8FAFC;
+  --border-color: #2D3F55;
+}
+
+* {
+  transition: background-color 300ms ease-out, color 300ms ease-out, border-color 300ms ease-out, box-shadow 300ms ease-out, transform 300ms ease-out, opacity 300ms ease-out;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 110%; /* Increased text size further by user request */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 99px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+/* Shimmer skeleton */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-card) 25%, var(--border-color) 50%, var(--surface-card) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* Pulse dot for AI indicator */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Focus ring */
+*:focus-visible {
+  outline: 2px solid #0F766E;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Skip to content */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  z-index: 999;
+  padding: 8px 16px;
+  background: #0F766E;
+  color: white;
+  border-radius: 0 0 8px 0;
+}
+.skip-to-content:focus {
+  left: 0;
+  top: 0;
+}

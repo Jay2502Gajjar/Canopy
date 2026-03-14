@@ -1,0 +1,19 @@
+# environment variables
+.env
+.env.local
+backend/.env
+
+# node
+node_modules
+
+# next
+.next
+
+# logs
+*.log
+
+# python
+__pycache__/
+
+# utilities with secrets
+backend/generateToken.js
